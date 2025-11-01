@@ -7,7 +7,7 @@ export async function embedText(text: string): Promise<number[]> {
             "Content-Type": "application/json",
         },
         body: JSON.stringify({
-            text,
+            text: [text],  // Service expects array
         }),
     });
 
@@ -19,6 +19,9 @@ export async function embedText(text: string): Promise<number[]> {
     const vector = data.vectors[0];
     if (!vector) {
         throw new Error("No vector returned from embedder service");
+    }
+    if (!Array.isArray(vector) || vector.length === 0) {
+        throw new Error(`Invalid vector format: expected array, got ${typeof vector}`);
     }
     return vector;
 }

@@ -36,7 +36,8 @@ export class DBConnector {
     fetchRowsByIds(table: string, rowIds: string[]) {
         if (rowIds.length === 0) return [];
         const placeholders = rowIds.map(() => "?").join(", ");
-        const stmt = this.db.prepare(`SELECT rowid as id, * FROM ${table} WHERE rowid IN (${placeholders})`);
+        // Query by 'id' column instead of 'rowid' since we use UUIDs
+        const stmt = this.db.prepare(`SELECT id, * FROM ${table} WHERE id IN (${placeholders})`);
         return stmt.all(...rowIds);
     }
 }
