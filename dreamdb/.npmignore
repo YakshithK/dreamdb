@@ -1,0 +1,39 @@
+# Source files
+src/
+demo/
+*.ts
+!*.d.ts
+
+# Build artifacts
+*.js.map
+*.d.ts.map
+*.js
+!dist/**/*.js
+
+# Development files
+tsconfig.json
+.git/
+.gitignore
+*.sqlite
+
+# Testing
+test/
+tests/
+*.test.ts
+*.spec.ts
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Documentation
+# README.md - included in package
+docs/
+
+# Python/embedder (if not needed in package)
+embedder/
+venv/
+

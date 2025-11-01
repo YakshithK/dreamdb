@@ -1,3 +1,17 @@
 node_modules/
 *.sqlite
 venv/
+
+# Build artifacts
+dist/
+*.js.map
+*.d.ts.map
+!dreamdb/dist/**/*.js
+demo/*.js
+demo/*.d.ts
+demo/*.js.map
+demo/*.d.ts.map
+src/*.js
+src/*.d.ts
+src/*.js.map
+src/*.d.ts.map

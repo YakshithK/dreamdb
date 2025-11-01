@@ -8,6 +8,14 @@ export class DreamDB {
     db!: DBConnector;
     index!: VectorIndex;
 
+    constructor(opts?: { connectionString?: string; path?: string }) {
+        if (opts) {
+            const connectionString = opts.connectionString || opts.path || ":memory:";
+            this.db = new DBConnector(connectionString);
+            this.index = new VectorIndex();
+        }
+    }
+
     static async connect (opts: { connectionString: string}) {
         const instance = new DreamDB();
         instance.db = new DBConnector(opts.connectionString);
@@ -40,5 +48,9 @@ export class DreamDB {
 
     async ask(query: string, top = 5) {
         return processQuery(query, this.db, this.index, top);
+    }
+
+    async query(query: string, top = 5) {
+        return this.ask(query, top);
     }
 }
