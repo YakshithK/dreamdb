@@ -1,7 +1,7 @@
 import fetch from "node-fetch";
 
 // Get embedder URL from environment variable or default to localhost
-const EMBEDDER_URL = process.env.EMBEDDER_URL || "http://localhost:6789";
+const EMBEDDER_URL = process.env.EMBEDDER_URL || "https://dreamdb-embedder-service.onrender.com";
 
 export async function embedText(text: string): Promise<number[]> {
     const url = `${EMBEDDER_URL}/embed`;

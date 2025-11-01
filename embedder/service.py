@@ -3,11 +3,21 @@ from flask_cors import CORS
 from sentence_transformers import SentenceTransformer
 import os
 
-model = SentenceTransformer("all-MiniLM-L6-v2")
 app = Flask(__name__)
 
-# Enable CORS for all routes (adjust origins in production)
-CORS(app, resources={r"/embed": {"origins": "*"}})
+# Enable CORS for all routes
+CORS(app, resources={r"/*": {"origins": "*"}})
+
+# Lazy load model to save memory on startup
+model = None
+
+def get_model():
+    global model
+    if model is None:
+        print("Loading model...")
+        model = SentenceTransformer("all-MiniLM-L6-v2")
+        print("Model loaded!")
+    return model
 
 @app.route("/health", methods=["GET"])
 def health():
@@ -30,11 +40,13 @@ def embed():
         return jsonify({"error": "text must be string or array"}), 400
     
     try:
-        vectors = model.encode(texts).tolist()
+        model_instance = get_model()  # Lazy load
+        vectors = model_instance.encode(texts).tolist()
         return jsonify({"vectors": vectors})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 6789))
-    app.run(host="0.0.0.0", port=port, debug=False)  # debug=False for production
+    # Use production server - Render needs to detect the port binding
+    app.run(host="0.0.0.0", port=port, debug=False)
