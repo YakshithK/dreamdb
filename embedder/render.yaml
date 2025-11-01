@@ -3,4 +3,4 @@ services:
     name: dreamdb-embedder-service
     runtime: python
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn --bind 0.0.0.0:$PORT service:app
+    startCommand: gunicorn --bind 0.0.0.0:$PORT --timeout 120 --workers 1 service:app
