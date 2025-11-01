@@ -2,5 +2,6 @@ services:
   - type: web
     name: dreamdb-embedder-service
     runtime: python
+    pythonVersion: 3.12.5
     buildCommand: pip install -r requirements.txt
     startCommand: gunicorn --bind 0.0.0.0:$PORT --timeout 120 --workers 1 service:app
