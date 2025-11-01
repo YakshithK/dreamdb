@@ -10,19 +10,19 @@ CORS(app, resources={r"/*": {"origins": "*"}})
 
 # Use TF-IDF - no model download needed, super lightweight!
 vectorizer = None
-all_texts = []  # Keep track of all texts for fitting
 
 def get_vectorizer():
     global vectorizer
     if vectorizer is None:
         print("Initializing TF-IDF vectorizer (no model download - instant!)...")
         # Create TF-IDF vectorizer with 384 dimensions (same as MiniLM)
+        # Remove min_df/max_df constraints to work with any number of documents
         vectorizer = TfidfVectorizer(
             max_features=384,
             stop_words='english',
             ngram_range=(1, 2),  # Use unigrams and bigrams
-            min_df=1,
-            max_df=0.95
+            lowercase=True,
+            norm='l2'  # Normalize vectors
         )
         print("TF-IDF vectorizer ready!")
     return vectorizer
@@ -56,19 +56,11 @@ def embed():
         print(f"Encoding {len(texts)} text(s) with TF-IDF...")
         vec = get_vectorizer()
         
-        # Add new texts to corpus for better vocabulary
-        global all_texts
-        all_texts.extend(texts)
-        all_texts = list(set(all_texts))  # Remove duplicates
+        # Fit-transform on the current texts (works with any number of documents)
+        # This is simpler and avoids the max_df/min_df issue with small document sets
+        vectors = vec.fit_transform(texts).toarray().tolist()
         
-        # Fit on all texts we've seen, then transform current texts
-        if len(all_texts) > 0:
-            vec.fit(all_texts)
-        
-        # Transform the current texts
-        vectors = vec.transform(texts).toarray().tolist()
-        
-        # Ensure vectors are 384 dimensions (pad with zeros if needed)
+        # Ensure vectors are exactly 384 dimensions (pad with zeros if needed, truncate if too long)
         for i, v in enumerate(vectors):
             if len(v) < 384:
                 vectors[i] = v + [0.0] * (384 - len(v))
