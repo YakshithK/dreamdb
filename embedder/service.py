@@ -44,9 +44,7 @@ def embed():
         vectors = model_instance.encode(texts).tolist()
         return jsonify({"vectors": vectors})
     except Exception as e:
+        import traceback
+        print(f"Error in embed: {e}")
+        print(traceback.format_exc())
         return jsonify({"error": str(e)}), 500
-
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 6789))
-    # Use production server - Render needs to detect the port binding
-    app.run(host="0.0.0.0", port=port, debug=False)
