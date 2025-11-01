@@ -1,4 +1,4 @@
-import { Database } from "better-sqlite3";
+import Database from "better-sqlite3";
 import crypto from "crypto";
 
 export class DBConnector { 
