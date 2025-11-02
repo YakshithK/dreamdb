@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "dependencies": {
-    "@yakshith/dreamdb": "^0.0.1",
+    "@yakshith/dreamdb": "^3.0.0",
     "base64-js": "^1.5.1",
     "better-sqlite3": "^12.4.1",
     "bindings": "^1.5.0",
