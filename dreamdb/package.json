@@ -1,6 +1,6 @@
 {
   "name": "@yakshith/dreamdb",
-  "version": "3.0.0",
+  "version": "0.0.1",
   "description": "A drop-in semantic wrapped for any existing SQLite database.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
