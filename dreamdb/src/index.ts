@@ -25,23 +25,16 @@ export class DreamDB {
 
     async insert(table: string, row: any) {
         const rowId = row.id || crypto.randomUUID();
-        console.log("➕ [DEBUG] Inserting into table:", table, "rowId:", rowId);
         
         // Ensure id is included in the row object for database insertion
         const rowWithId = { ...row, id: rowId };
-        const fingerprint = this.db.insert(table, rowId, rowWithId);
-        console.log("✅ [DEBUG] Row inserted into SQLite");
+        this.db.insert(table, rowId, rowWithId);
 
         const text = rowToText(rowWithId);
-        console.log("📝 [DEBUG] Row text:", text);
-        
         const vec = await embedText(text);
-        console.log("🔢 [DEBUG] Vector created, length:", vec.length);
         
         const vectorKey = `${table}_${rowId}`;
         this.index.add(vectorKey, vec);
-        console.log("💾 [DEBUG] Vector stored with key:", vectorKey);
-        console.log("📊 [DEBUG] Total vectors in index:", this.index.vectors.size);
 
         return rowId;
     }

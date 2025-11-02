@@ -5,7 +5,6 @@ const EMBEDDER_URL = process.env.EMBEDDER_URL || "https://dreamdb-embedder-servi
 
 export async function embedText(text: string): Promise<number[]> {
     const url = `${EMBEDDER_URL}/embed`;
-    console.log(`🔗 [DEBUG] Calling embedder at: ${url}`);
     
     try {
         // Create AbortController for 2 minute timeout (model loading can take 60s+)
@@ -27,7 +26,6 @@ export async function embedText(text: string): Promise<number[]> {
 
         if (!res.ok) {
             const errorText = await res.text();
-            console.error(`❌ [DEBUG] Embedder error ${res.status}: ${errorText}`);
             
             // Better error messages
             if (res.status === 502) {
@@ -52,7 +50,6 @@ export async function embedText(text: string): Promise<number[]> {
             throw new Error(`Invalid vector format: expected array, got ${typeof vector}`);
         }
         
-        console.log(`✅ [DEBUG] Successfully got vector of length: ${vector.length}`);
         return vector;
     } catch (error) {
         if (error instanceof Error) {

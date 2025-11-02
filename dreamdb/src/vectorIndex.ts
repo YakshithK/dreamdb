@@ -6,8 +6,6 @@ export class VectorIndex {
     }
 
     search(queryVec: number[], topK: number = 5) {
-        console.log("🔍 [DEBUG] VectorIndex.search - vectors in index:", this.vectors.size);
-        
         const results: Array<{id: string; score: number }> = [];
 
         for (const [id, vec] of this.vectors.entries()) {
@@ -17,7 +15,6 @@ export class VectorIndex {
 
         results.sort((a, b) => b.score - a.score);
         const topResults = results.slice(0, topK);
-        console.log("📊 [DEBUG] Top results:", topResults.map(r => ({ id: r.id, score: r.score.toFixed(4) })));
         
         return topResults;
     }
