@@ -1,6 +1,13 @@
+import os
+import sys
 import unittest
 from unittest.mock import patch, MagicMock
 from flask import Flask, json
+
+# Add the project root to the Python path
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
+
+# Now import the app and get_vectorizer from the embedder module
 from embedder.service import app, get_vectorizer
 
 class TestEmbedderService(unittest.TestCase):
