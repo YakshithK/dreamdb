@@ -35,7 +35,7 @@ jobs:
         run: npx tsx demo/demo.ts
 
       - name: Install stress test dependencies
-        working-directory: ./dreamdb-stress
+        working-directory: ./tests
         run: |
           # Remove the npm version and use local package for CI
           npm install --ignore-scripts
@@ -43,7 +43,7 @@ jobs:
           npm install file:../dreamdb --save --force
 
       - name: Run stress test
-        working-directory: ./dreamdb-stress
+        working-directory: ./tests
         run: npm run stress || echo "Stress test completed with warnings"
 
   python-embedder-test:

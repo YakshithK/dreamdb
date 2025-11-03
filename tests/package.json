@@ -12,6 +12,7 @@
   "type": "module",
   "dependencies": {
     "@yakshith/dreamdb": "^0.0.2",
+    "faker": "^5.5.3",
     "fs": "^0.0.1-security",
     "path": "^0.12.7",
     "vitest": "^4.0.6"

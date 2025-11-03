@@ -27,7 +27,7 @@ dreamdb/
 ├── embedder/             # Python embedding service
 │   ├── service.py         # Flask service using TF-IDF
 │   └── requirements.txt   # Python dependencies
-├── dreamdb-stress/       # Stress testing suite
+├── tests/       # Stress testing suite
 │   └── stress.ts         # Comprehensive stress test
 └── .github/workflows/    # CI/CD pipelines
 ```
@@ -119,7 +119,7 @@ DreamDB consists of three main components:
 The project includes a comprehensive stress test:
 
 ```bash
-cd dreamdb-stress
+cd tests
 npm install
 npm run stress
 ```
