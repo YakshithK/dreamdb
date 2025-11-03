@@ -5,10 +5,20 @@ from unittest.mock import patch, MagicMock
 from flask import Flask, json
 
 # Add the project root to the Python path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '../..'))
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
 
 # Now import the app and get_vectorizer from the embedder module
-from embedder.service import app, get_vectorizer
+try:
+    from embedder.service import app, get_vectorizer
+except ImportError as e:
+    print(f"Error importing embedder module: {e}")
+    print(f"Current sys.path: {sys.path}")
+    print(f"Current working directory: {os.getcwd()}")
+    print(f"Project root: {project_root}")
+    print(f"Contents of project root: {os.listdir(project_root)}")
+    raise
 
 class TestEmbedderService(unittest.TestCase):
     def setUp(self):
