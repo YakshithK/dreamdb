@@ -6,7 +6,7 @@ export class DBConnector {
 
     constructor(connectionString: string) {
         this.db = new Database(connectionString);
-
+        
         // metadata table to store embeddings
         this.db.exec(`
             CREATE TABLE IF NOT EXISTS dreamdb_meta (
