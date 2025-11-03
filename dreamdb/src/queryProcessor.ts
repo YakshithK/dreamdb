@@ -1,13 +1,7 @@
 import { DBConnector } from "./dbConnector.js";
 import { VectorIndex } from "./vectorIndex.js";
 import { embedText } from "./embedder.js";
-
-interface SearchResult {
-    id: string;
-    payload: any;
-    score: number;
-    explanation: string;
-}
+import type { SearchResult, SearchCandidate } from "./types.js";
 
 export async function processQuery(
     query: string, 
@@ -22,10 +16,14 @@ export async function processQuery(
         return [];
     }
 
-    const tableGroups = candidates.reduce((acc: Record<string, any[]>, candidate) => {
+    const tableGroups = candidates.reduce<Record<string, Array<SearchCandidate & { rowId: string }>>>((acc, candidate) => {
         const [table, rowId] = candidate.id.split('_');
-        if (!acc[table]) acc[table] = [];
-        acc[table].push({ ...candidate, rowId});
+        if (!table || !rowId) return acc;
+        
+        if (!acc[table]) {
+            acc[table] = [];
+        }
+        acc[table].push({ ...candidate, rowId });
         return acc;
     }, {});
 
@@ -33,13 +31,13 @@ export async function processQuery(
 
     // Process each table's results
     for (const [table, tableCandidates] of Object.entries(tableGroups)) {
+        if (!tableCandidates?.length) continue;
 
-        const rowIds = (tableCandidates as any[]).map((c: {rowId: string}) => c.rowId);
-        const rows = db.fetchRowsByIds(table as string, rowIds);
+        const rowIds = tableCandidates.map(c => c.rowId).filter((id): id is string => Boolean(id));
+        const rows = db.fetchRowsByIds(table, rowIds);
 
-        
         // Create result objects with scores
-        const tableResults = rows.map((row: any) => {
+        const tableResults = rows.map((row) => {
             const candidate = (tableCandidates as any[]).find(c => c.rowId === row.id);
             const score = candidate?.score || 0;
             

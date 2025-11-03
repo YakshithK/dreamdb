@@ -58,8 +58,9 @@ export class DBConnector {
             this.db.prepare(query).run(values);
             return fingerprint;
         } catch (error) {
-            console.error('Error executing query:', { query, values, error });
-            throw new Error(`Database operation failed: ${error.message}`);
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            console.error('Error executing query:', { query, values, error: errorMessage });
+            throw new Error(`Database operation failed: ${errorMessage}`);
         }
     }
 
@@ -95,7 +96,7 @@ export class DBConnector {
         }
     }
 
-    public fetchRowsByIds(table: string, rowIds: string[]) {
+    public fetchRowsByIds(table: string, rowIds: string[]): any[] {
         if (!table || !rowIds || !Array.isArray(rowIds) || rowIds.length === 0) {
             return [];
         }

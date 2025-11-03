@@ -18,7 +18,7 @@ describe("Large Dataset Stress tests", () => {
 
     it("should insert 10,000 records", async () => {
         const start = Date.now();
-        const promises = [];
+        const promises: Promise<string>[] = [];
 
         for (let i = 0; i < 10000; i ++) {
             promises.push(
