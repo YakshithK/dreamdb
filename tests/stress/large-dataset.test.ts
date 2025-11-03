@@ -25,7 +25,7 @@ describe("Large Dataset Stress tests", () => {
                 db.insert("users", {
                     name: faker.name.findName(),
                     email: faker.internet.email(),
-                    age: faker.datatype.number({ min: 18, max" 80})
+                    age: faker.datatype.number({ min: 18, max: 80})
                 })
             )
         }
