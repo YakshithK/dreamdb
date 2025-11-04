@@ -72,9 +72,9 @@ jobs:
           pip install -r requirements.txt
 
       - name: Run Python tests
-        working-directory: ./tests
+        working-directory: ./embedder
         run: |
-          PYTHONPATH=$PYTHONPATH:$(pwd)/.. pytest unit/embedderService.test.py -v --cov=embedder --cov-report=xml
+          python -m pytest embedderService.test.py -v --cov=. --cov-report=xml
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
