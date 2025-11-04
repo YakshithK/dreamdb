@@ -81,7 +81,7 @@ class TestEmbedderService(unittest.TestCase):
                                json={"text": 123},
                                content_type='application/json')
         
-        self.assertEqual(response.status_code, 500)  # 500 is more appropriate for server-side errors
+        self.assertEqual(response.status_code, 400)  # 400 for invalid input
         data = response.get_json()
         self.assertIn('error', data)
         self.assertIn('must be string or array', data['error'])
