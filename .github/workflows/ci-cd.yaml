@@ -12,6 +12,7 @@ jobs:
   build-test:
     name: Build + Test DreamDB
     runs-on: ubuntu-latest
+    needs: test-embedder-service  # Make sure embedder tests run first
 
     steps:
       - name: Checkout repository
@@ -46,45 +47,43 @@ jobs:
         working-directory: ./tests
         run: npm test
 
-  python-embedder-test:
+  test-embedder-service:
     name: Test Embedder Service
     runs-on: ubuntu-latest
     
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-
+        
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.11'
-          cache: 'pip'
-
-      - name: Install Python dependencies
-        working-directory: ./tests
+          python-version: '3.12'
+          
+      - name: Install dependencies
+        working-directory: ./embedder
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-
-      - name: Install embedder service dependencies
+          pip install pytest pytest-cov
+          
+      - name: Run tests
         working-directory: ./embedder
+        env:
+          PYTHONPATH: ${{ github.workspace }}/embedder
         run: |
-          pip install -r requirements.txt
-
-      - name: Run Python tests
-        working-directory: ./embedder
-        run: |
-          python -m pytest embedderService.test.py -v --cov=. --cov-report=xml
-
+          python -m pytest tests/ -v --cov=. --cov-report=xml
+          
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
         with:
-          file: ./coverage.xml
+          file: ./embedder/coverage.xml
           fail_ci_if_error: false
-
+          verbose: true
+          
   publish:
     name: Publish to NPM
-    needs: [build-test, python-embedder-test]
+    needs: [build-test, test-embedder-service, python-embedder-test]
     if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
 
