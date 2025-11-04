@@ -54,14 +54,26 @@ class TestEmbedderService(unittest.TestCase):
             self.assertEqual(len(vector), 384)  # Each vector should be 384-dimensional
 
     def test_embed_empty_text(self):
-        """Test embedding an empty string."""
+        """Test embedding an empty string or whitespace only."""
+        # Test with empty string
         response = self.app.post('/embed', 
-                               json={"text": " "},  # Single space to avoid empty vocabulary
+                               json={"text": ""},
                                content_type='application/json')
         
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 400)
         data = response.get_json()
-        self.assertEqual(len(data['vectors'][0]), 384)
+        self.assertIn('error', data)
+        self.assertIn('empty vocabulary', data['error'].lower())
+        
+        # Test with whitespace only
+        response = self.app.post('/embed', 
+                               json={"text": "   "},
+                               content_type='application/json')
+        
+        self.assertEqual(response.status_code, 400)
+        data = response.get_json()
+        self.assertIn('error', data)
+        self.assertIn('empty vocabulary', data['error'].lower())
 
     def test_embed_invalid_input(self):
         """Test with invalid input (not a string or list)."""
