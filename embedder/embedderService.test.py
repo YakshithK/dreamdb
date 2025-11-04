@@ -4,13 +4,13 @@ import unittest
 from unittest.mock import patch, MagicMock
 from flask import Flask, json
 
-# Add the project root to the Python path
-project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '../..'))
-if project_root not in sys.path:
-    sys.path.insert(0, project_root)
+# Add the current directory to the Python path
+current_dir = os.path.dirname(os.path.abspath(__file__))
+if current_dir not in sys.path:
+    sys.path.insert(0, current_dir)
 
-# Import from the correct module path
-from dreamdb.embedder.service import app, get_vectorizer
+# Import the app and get_vectorizer from the local service module
+from service import app, get_vectorizer
 
 class TestEmbedderService(unittest.TestCase):
     def setUp(self):
