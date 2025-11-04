@@ -9,16 +9,8 @@ project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '../..'))
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
-# Now import the app and get_vectorizer from the embedder module
-try:
-    from embedder.service import app, get_vectorizer
-except ImportError as e:
-    print(f"Error importing embedder module: {e}")
-    print(f"Current sys.path: {sys.path}")
-    print(f"Current working directory: {os.getcwd()}")
-    print(f"Project root: {project_root}")
-    print(f"Contents of project root: {os.listdir(project_root)}")
-    raise
+# Import from the correct module path
+from dreamdb.embedder.service import app, get_vectorizer
 
 class TestEmbedderService(unittest.TestCase):
     def setUp(self):
