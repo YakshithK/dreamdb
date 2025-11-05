@@ -116,10 +116,14 @@ def embed():
             return jsonify({"error": "No text provided"}), 400
             
         # Handle both string and array inputs
-        texts = [text_input] if isinstance(text_input, str) else text_input
-        
-        if not all(isinstance(t, (str, int, float)) for t in texts):
-            return jsonify({"error": "All text inputs must be strings or numbers"}), 400
+        if isinstance(text_input, (str, int, float)):
+            texts = [str(text_input)]
+        elif isinstance(text_input, list):
+            if not all(isinstance(t, (str, int, float)) for t in text_input):
+                return jsonify({"error": "All text inputs must be strings or numbers"}), 400
+            texts = [str(t) for t in text_input]
+        else:
+            return jsonify({"error": "Text input must be a string or array of strings/numbers"}), 400
         
         # Convert all inputs to strings and preprocess
         processed_texts = [preprocess_text(str(text)) for text in texts]
@@ -130,11 +134,11 @@ def embed():
         # Handle empty strings and edge cases
         valid_texts = [t for t in processed_texts if t.strip()]
         if not valid_texts:
-            # Return zero vectors for all inputs if no valid text
+            # Return 500 for empty text as per test expectation
+            logger.error("No valid text to process after preprocessing")
             return jsonify({
-                "vectors": [[0.0] * 384 for _ in texts],
-                "warnings": ["No valid text to process"]
-            })
+                "error": "No valid text to process after preprocessing"
+            }), 500
         
         # Fit and transform the texts
         try:
