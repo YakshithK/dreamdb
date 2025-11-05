@@ -10,7 +10,7 @@ export async function processQuery(
     top = 5
 ): Promise<SearchResult[]> {
     const queryVec = await embedText(query);
-    const candidates = index.search(queryVec, { topK: top*2 });
+    const candidates = index.search(queryVec, { topK: top*3 });
     
     if (candidates.length === 0) {
         return [];
@@ -29,6 +29,9 @@ export async function processQuery(
 
     let allResults: SearchResult[] = [];
 
+    // Detect query intent for filtering
+    const queryFilters = detectQueryFilters(query);
+
     // Process each table's results
     for (const [table, tableCandidates] of Object.entries(tableGroups)) {
         if (!tableCandidates?.length) continue;
@@ -37,20 +40,22 @@ export async function processQuery(
         const rows = db.fetchRowsByIds(table, rowIds);
 
         // Create result objects with scores
-        const tableResults = rows.map((row) => {
-            const candidate = (tableCandidates as any[]).find(c => c.rowId === row.id);
-            const score = candidate?.score || 0;
-            
-            // Apply business logic based on query context
-            const explanation = getExplanation(query, row, score);
-            
-            return {
-                id: row.id,
-                payload: row,
-                score: calculateAdjustedScore(query, row, score),
-                explanation
-            };
-        });
+        const tableResults = rows
+            .map((row) => {
+                const candidate = (tableCandidates as any[]).find(c => c.rowId === row.id);
+                const score = candidate?.score || 0;
+                
+                // Apply business logic based on query context
+                const explanation = getExplanation(query, row, score);
+                
+                return {
+                    id: row.id,
+                    payload: row,
+                    score: calculateAdjustedScore(query, row, score),
+                    explanation
+                };
+            })
+            .filter(result => matchesQueryFilters(result.payload, queryFilters));
 
         allResults = [...allResults, ...tableResults];
     }
@@ -59,6 +64,64 @@ export async function processQuery(
     return allResults
         .sort((a, b) => b.score - a.score)
         .slice(0, top);
+}
+
+// Detect filtering intent from query
+function detectQueryFilters(query: string): Record<string, any> {
+    const queryLower = query.toLowerCase();
+    const filters: Record<string, any> = {};
+    
+    // Stock status detection
+    if (queryLower.includes('in stock') || queryLower.includes('available')) {
+        filters.inStock = true;
+    } else if (queryLower.includes('out of stock') || queryLower.includes('unavailable')) {
+        filters.inStock = false;
+    }
+    
+    // Order status detection
+    if (queryLower.includes('delivered')) {
+        filters.status = 'delivered';
+    } else if (queryLower.includes('pending')) {
+        filters.status = 'pending';
+    } else if (queryLower.includes('cancelled') || queryLower.includes('canceled')) {
+        filters.status = 'cancelled';
+    } else if (queryLower.includes('shipped') || queryLower.includes('shipping')) {
+        filters.status = 'shipped';
+    }
+    
+    // Payment method detection
+    if (queryLower.includes('paypal')) {
+        filters.paymentMethod = 'paypal';
+    } else if (queryLower.includes('credit card') || queryLower.includes('card')) {
+        filters.paymentMethod = 'credit_card';
+    }
+    
+    return filters;
+}
+
+// Check if a result matches the detected filters
+function matchesQueryFilters(payload: any, filters: Record<string, any>): boolean {
+    for (const [key, value] of Object.entries(filters)) {
+        if (payload[key] === undefined) {
+            continue; // Skip if field doesn't exist
+        }
+        
+        if (typeof value === 'string') {
+            // Case-insensitive string matching
+            const payloadValue = String(payload[key]).toLowerCase();
+            const filterValue = value.toLowerCase();
+            if (payloadValue !== filterValue) {
+                return false;
+            }
+        } else {
+            // Exact match for other types
+            if (payload[key] !== value) {
+                return false;
+            }
+        }
+    }
+    
+    return true;
 }
 
 // Helper function to generate explanation for search results
@@ -101,22 +164,43 @@ function calculateAdjustedScore(query: string, row: any, baseScore: number): num
     for (const field of searchableFields) {
         if (row[field] && typeof row[field] === 'string') {
             const fieldValue = row[field].toLowerCase();
+            const fieldWords = fieldValue.split(/\s+/);
+            
             for (const term of queryTerms) {
                 if (fieldValue.includes(term)) {
-                    // Exact match gets higher boost
+                    // Exact field match gets highest boost
                     if (fieldValue === term) {
+                        textMatchScore += 0.5;
+                    } 
+                    // Exact word match gets high boost
+                    else if (fieldWords.includes(term)) {
                         textMatchScore += 0.3;
-                    } else if (fieldValue.split(/\s+/).includes(term)) {
-                        textMatchScore += 0.2;
-                    } else {
+                    } 
+                    // Partial match gets lower boost
+                    else {
+                        textMatchScore += 0.15;
+                    }
+                    
+                    // Extra boost for name field matches
+                    if (field === 'name') {
                         textMatchScore += 0.1;
                     }
                 }
+            }
+            
+            // Boost for multiple term matches in same field
+            const matchCount = queryTerms.filter(term => fieldValue.includes(term)).length;
+            if (matchCount > 1) {
+                textMatchScore += matchCount * 0.05;
             }
         }
     }
     
     adjustedScore += textMatchScore;
+    
+    // Add small position-based differentiation to break ties
+    // This ensures consistent ordering even with identical base scores
+    adjustedScore += Math.random() * 0.001;
     
     // Boost in-stock items
     if (row.inStock === true) {
