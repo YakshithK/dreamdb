@@ -111,19 +111,19 @@ def embed():
         text_input = data.get("text", [])
         normalize = data.get("normalize", True)
         
-        # Validate input
-        if not text_input:
-            return jsonify({"error": "No text provided"}), 400
-            
+        # Validate input type first
+        if not isinstance(text_input, (str, list)):
+            return jsonify({"error": "text must be string or array"}), 400
+        
         # Handle both string and array inputs
-        if isinstance(text_input, (str, int, float)):
-            texts = [str(text_input)]
+        if isinstance(text_input, str):
+            texts = [text_input]
         elif isinstance(text_input, list):
-            if not all(isinstance(t, (str, int, float)) for t in text_input):
-                return jsonify({"error": "All text inputs must be strings or numbers"}), 400
-            texts = [str(t) for t in text_input]
+            if not all(isinstance(t, str) for t in text_input):
+                return jsonify({"error": "All text inputs must be strings"}), 400
+            texts = text_input
         else:
-            return jsonify({"error": "Text input must be a string or array of strings/numbers"}), 400
+            return jsonify({"error": "text must be string or array"}), 400
         
         # Convert all inputs to strings and preprocess
         processed_texts = [preprocess_text(str(text)) for text in texts]
