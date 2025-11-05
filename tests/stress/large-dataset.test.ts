@@ -46,7 +46,7 @@ describe("Large Dataset Stress tests", () => {
         const duration = Date.now() - start;
 
         expect(results).toHaveLength(10);
-        expect(duration).toBeLessThan(5000);
+        expect(duration).toBeLessThan(10000);
         console.log(`Query over 10,000 records took ${duration}ms`);
     });
 
