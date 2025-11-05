@@ -135,9 +135,9 @@ def embed():
         valid_texts = [t for t in processed_texts if t.strip()]
         if not valid_texts:
             # Return 500 for empty text as per test expectation
-            logger.error("No valid text to process after preprocessing")
+            logger.error("Empty vocabulary - no valid text to process after preprocessing")
             return jsonify({
-                "error": "No valid text to process after preprocessing"
+                "error": "Empty vocabulary - no valid text to process after preprocessing"
             }), 500
         
         # Fit and transform the texts
