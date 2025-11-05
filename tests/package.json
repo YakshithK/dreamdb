@@ -5,13 +5,14 @@
   "main": "index.js",
   "scripts": {
     "test": "npm-run-all test:js test:py",
-    "test:js": "vitest run",
+    "test:js": "vitest run --exclude='**/stress/**'",
     "test:js:watch": "vitest",
     "test:py": "source venv/bin/activate && pytest unit/embedderService.test.py -v",
     "test:unit": "vitest run tests/unit",
     "test:integration": "vitest run tests/integration",
     "test:edge": "vitest run tests/edge-cases",
     "test:functional": "vitest run tests/functional",
+    "test:stress": "vitest run stress/",
     "test:all": "npm-run-all test:js test:py",
     "install:python-deps": "pip install -r requirements-dev.txt"
   },
