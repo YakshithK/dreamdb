@@ -134,11 +134,12 @@ def embed():
         # Handle empty strings and edge cases
         valid_texts = [t for t in processed_texts if t.strip()]
         if not valid_texts:
-            # Return 500 for empty text as per test expectation
-            logger.error("Empty vocabulary - no valid text to process after preprocessing")
+            # Return zero vectors for empty text instead of error
+            logger.warning("Empty text provided, returning zero vectors")
             return jsonify({
-                "error": "Empty vocabulary - no valid text to process after preprocessing"
-            }), 500
+                "vectors": [[0.0] * 384 for _ in texts],
+                "dimensions": 384
+            }), 200
         
         # Fit and transform the texts
         try:

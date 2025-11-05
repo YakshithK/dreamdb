@@ -91,22 +91,64 @@ function getExplanation(query: string, row: any, baseScore: number): string {
 // Helper function to adjust scores based on business rules
 function calculateAdjustedScore(query: string, row: any, baseScore: number): number {
     let adjustedScore = baseScore;
+    const queryLower = query.toLowerCase();
+    const queryTerms = queryLower.split(/\s+/).filter(Boolean);
+    
+    // Add text matching bonus for better differentiation
+    let textMatchScore = 0;
+    const searchableFields = ['name', 'description', 'title', 'category', 'brand'];
+    
+    for (const field of searchableFields) {
+        if (row[field] && typeof row[field] === 'string') {
+            const fieldValue = row[field].toLowerCase();
+            for (const term of queryTerms) {
+                if (fieldValue.includes(term)) {
+                    // Exact match gets higher boost
+                    if (fieldValue === term) {
+                        textMatchScore += 0.3;
+                    } else if (fieldValue.split(/\s+/).includes(term)) {
+                        textMatchScore += 0.2;
+                    } else {
+                        textMatchScore += 0.1;
+                    }
+                }
+            }
+        }
+    }
+    
+    adjustedScore += textMatchScore;
     
     // Boost in-stock items
     if (row.inStock === true) {
-        adjustedScore *= 1.2;
+        adjustedScore *= 1.15;
+    } else if (row.inStock === false) {
+        adjustedScore *= 0.8;
     }
     
     // Boost highly rated items
-    if (row.rating) {
-        adjustedScore *= (0.9 + (row.rating / 10));
+    if (row.rating && typeof row.rating === 'number') {
+        adjustedScore *= (0.95 + (row.rating / 20));
     }
     
     // Apply category-specific boosts
-    const queryLower = query.toLowerCase();
-    if (row.category && queryLower.includes(row.category.toLowerCase())) {
+    if (row.category && queryTerms.some(term => row.category.toLowerCase().includes(term))) {
+        adjustedScore *= 1.25;
+    }
+    
+    // Status-based filtering/boosting
+    if (row.status) {
+        const statusLower = row.status.toLowerCase();
+        if (queryTerms.some(term => statusLower.includes(term))) {
+            adjustedScore *= 1.3;
+        }
+    }
+    
+    // Payment method matching
+    if (row.paymentMethod && queryTerms.some(term => 
+        row.paymentMethod.toLowerCase().includes(term)
+    )) {
         adjustedScore *= 1.3;
     }
     
-    return adjustedScore;
+    return Math.max(0, adjustedScore);
 }

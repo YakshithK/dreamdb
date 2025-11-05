@@ -55,25 +55,27 @@ class TestEmbedderService(unittest.TestCase):
 
     def test_embed_empty_text(self):
         """Test embedding an empty string or whitespace only."""
-        # Test with empty string
+        # Test with empty string - should return zero vectors
         response = self.app.post('/embed', 
                                json={"text": ""},
                                content_type='application/json')
         
-        self.assertEqual(response.status_code, 500)  # 500 is more appropriate for server-side errors
+        self.assertEqual(response.status_code, 200)  # Now returns 200 with zero vectors
         data = response.get_json()
-        self.assertIn('error', data)
-        self.assertIn('empty vocabulary', data['error'].lower())
+        self.assertIn('vectors', data)
+        self.assertEqual(len(data['vectors']), 1)
+        self.assertEqual(data['vectors'][0], [0.0] * 384)
         
         # Test with whitespace only
         response = self.app.post('/embed', 
                                json={"text": "   "},
                                content_type='application/json')
         
-        self.assertEqual(response.status_code, 500)  # 500 is more appropriate for server-side errors
+        self.assertEqual(response.status_code, 200)  # Now returns 200 with zero vectors
         data = response.get_json()
-        self.assertIn('error', data)
-        self.assertIn('empty vocabulary', data['error'].lower())
+        self.assertIn('vectors', data)
+        self.assertEqual(len(data['vectors']), 1)
+        self.assertEqual(data['vectors'][0], [0.0] * 384)
 
     def test_embed_invalid_input(self):
         """Test with invalid input (not a string or list)."""
