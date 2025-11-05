@@ -10,7 +10,7 @@ export async function processQuery(
     top = 5
 ): Promise<SearchResult[]> {
     const queryVec = await embedText(query);
-    const candidates = index.search(queryVec, top*2);
+    const candidates = index.search(queryVec, { topK: top*2 });
     
     if (candidates.length === 0) {
         return [];

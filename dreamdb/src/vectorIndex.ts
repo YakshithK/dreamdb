@@ -166,7 +166,7 @@ export class VectorIndex {
 
             return index;
         } catch (error) {
-            throw new Error(`Failed to load vector index: ${error.message}`);
+            throw new Error(`Failed to load vector index: ${(error as Error).message}`);
         }
     }
 
