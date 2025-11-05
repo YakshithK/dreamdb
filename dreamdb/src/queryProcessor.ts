@@ -101,9 +101,16 @@ function detectQueryFilters(query: string): Record<string, any> {
 
 // Check if a result matches the detected filters
 function matchesQueryFilters(payload: any, filters: Record<string, any>): boolean {
+    // If no filters detected, accept all results
+    if (Object.keys(filters).length === 0) {
+        return true;
+    }
+    
+    // If filters are detected, ALL must match
     for (const [key, value] of Object.entries(filters)) {
-        if (payload[key] === undefined) {
-            continue; // Skip if field doesn't exist
+        // If field doesn't exist, reject this result
+        if (payload[key] === undefined || payload[key] === null) {
+            return false;
         }
         
         if (typeof value === 'string') {
@@ -114,7 +121,7 @@ function matchesQueryFilters(payload: any, filters: Record<string, any>): boolea
                 return false;
             }
         } else {
-            // Exact match for other types
+            // Exact match for other types (boolean, number)
             if (payload[key] !== value) {
                 return false;
             }
@@ -198,9 +205,10 @@ function calculateAdjustedScore(query: string, row: any, baseScore: number): num
     
     adjustedScore += textMatchScore;
     
-    // Add small position-based differentiation to break ties
-    // This ensures consistent ordering even with identical base scores
-    adjustedScore += Math.random() * 0.001;
+    // Add small differentiation to break ties
+    // Use a deterministic value based on row data to ensure consistent ordering
+    const tieBreaker = (row.name?.length || 0) * 0.0001 + (row.id?.length || 0) * 0.00001;
+    adjustedScore += tieBreaker;
     
     // Boost in-stock items
     if (row.inStock === true) {

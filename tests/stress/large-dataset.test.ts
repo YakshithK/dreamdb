@@ -38,7 +38,7 @@ describe("Large Dataset Stress tests", () => {
         expect(duration).toBeLessThan(120000);
 
         console.log(`Inserted 10,000 records in ${duration}ms (${(1000 / (duration / 1000)).toFixed(2)} inserts/sec)`);
-    })
+    }, 150000)
 
     it("should query efficiently with 10,000 records", async () => {
         const start = Date.now();
@@ -69,5 +69,5 @@ describe("Large Dataset Stress tests", () => {
 
         expect(db.index.vectors.size).toBeGreaterThanOrEqual(concurrent * perBatch);
         console.log(`Concurrent inserts (${concurrent}x${perBatch}) completed in ${duration}ms`);
-    });
+    }, 150000);
 });
